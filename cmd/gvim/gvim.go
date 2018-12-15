@@ -7,6 +7,10 @@ import (
 	"os"
 	"strings"
 
+	"github.com/alecthomas/chroma"
+	"github.com/alecthomas/chroma/formatters"
+	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/styles"
 	"github.com/jroimartin/gocui"
 )
 
@@ -19,7 +23,8 @@ type CommandEditor struct {
 	exec    bool
 }
 
-var fileName string = "default.txt"
+var fileName = "default.txt"
+var reload = false
 
 //Edit Implement the Editor interface
 func (ve *VimEditor) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
@@ -40,6 +45,7 @@ func (ve *VimEditor) InsertMode(v *gocui.View, key gocui.Key, ch rune, mod gocui
 		v.Title = "G-Vim Read"
 	case ch != 0 && mod == 0:
 		v.EditWrite(ch)
+		//highlightSyntax(v)
 	case key == gocui.KeySpace:
 		v.EditWrite(' ')
 	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
@@ -79,6 +85,14 @@ func (ve *VimEditor) NormalMode(v *gocui.View, key gocui.Key, ch rune, mod gocui
 		v.MoveCursor(1, 0, false)
 	case key == gocui.KeyEsc:
 		ve.mode = false
+	case key == gocui.KeyArrowDown:
+		v.MoveCursor(0, 1, false)
+	case key == gocui.KeyArrowUp:
+		v.MoveCursor(0, -1, false)
+	case key == gocui.KeyArrowLeft:
+		v.MoveCursor(-1, 0, false)
+	case key == gocui.KeyArrowRight:
+		v.MoveCursor(1, 0, false)
 	}
 }
 
@@ -109,10 +123,11 @@ func main() {
 	if len(args) == 2 {
 		fileName = os.Args[1]
 	} else if len(args) > 2 {
-		panic("Give a proper file name")
+		fmt.Println("Give a proper file name")
+		return
 	}
 
-	g, err := gocui.NewGui(gocui.OutputNormal)
+	g, err := gocui.NewGui(gocui.Output256)
 	if err != nil {
 		log.Panicln(err)
 	}
@@ -147,7 +162,7 @@ func main() {
 
 func layout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
-	if v, err := g.SetView("main", 0, 0, maxX, maxY-1); err != nil {
+	if v, err := g.SetView("main", 0, 0, maxX-1, maxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			log.Panicln(err)
 		}
@@ -170,7 +185,7 @@ func layout(g *gocui.Gui) error {
 			return err
 		}
 	}
-	if v, err := g.SetView("command", 0, maxY-3, maxX, maxY); err != nil {
+	if v, err := g.SetView("command", 0, maxY-3, maxX-1, maxY); err != nil {
 		if err != gocui.ErrUnknownView {
 			log.Panicln(err)
 		}
@@ -238,6 +253,29 @@ func commandForWrite(g *gocui.Gui, v *gocui.View) {
 	v.Clear()
 	fmt.Fprintf(v, "Wrote %d bytes into file %s", bytes, fileName)
 	f.Sync()
+}
+
+func highlightSyntax(view *gocui.View, content string) {
+	if content != "" {
+		content = view.ViewBuffer()
+	}
+	extn := strings.Split(fileName, ".")[1]
+	lexer := lexers.Get(extn)
+	if lexer == nil {
+		lexer = lexers.Fallback
+	}
+	lexer = chroma.Coalesce(lexer)
+	style := styles.Get("vs")
+	if style == nil {
+		style = styles.Fallback
+	}
+	formatter := formatters.Get("terminal256")
+	iterator, _ := lexer.Tokenise(nil, content)
+	if formatter == nil {
+		formatter = formatters.Fallback
+	}
+	view.Clear()
+	formatter.Format(view, style, iterator)
 }
 
 func isFileExists(fileName string) bool {

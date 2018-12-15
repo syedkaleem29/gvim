@@ -2,6 +2,65 @@
 
 
 [[projects]]
+  digest = "1:26777bf96d1c96d9be38c7c9795196b088c91c597ec5dae5bf6c02dc3c3520e9"
+  name = "github.com/alecthomas/chroma"
+  packages = [
+    ".",
+    "formatters",
+    "formatters/html",
+    "lexers",
+    "lexers/a",
+    "lexers/b",
+    "lexers/c",
+    "lexers/circular",
+    "lexers/d",
+    "lexers/e",
+    "lexers/f",
+    "lexers/g",
+    "lexers/h",
+    "lexers/i",
+    "lexers/internal",
+    "lexers/j",
+    "lexers/k",
+    "lexers/l",
+    "lexers/m",
+    "lexers/n",
+    "lexers/o",
+    "lexers/p",
+    "lexers/q",
+    "lexers/r",
+    "lexers/s",
+    "lexers/t",
+    "lexers/v",
+    "lexers/w",
+    "lexers/x",
+    "lexers/y",
+    "styles",
+  ]
+  pruneopts = "UT"
+  revision = "5a473179cfe450c6d80407452c241428de387f6b"
+  version = "v0.6.0"
+
+[[projects]]
+  branch = "master"
+  digest = "1:710109527a119c813d4fac773712dd92f449ed7c2f7b81f49822f94d290c8f72"
+  name = "github.com/danwakefield/fnmatch"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "cbb64ac3d964b81592e64f957ad53df015803288"
+
+[[projects]]
+  digest = "1:72dc2b6056e7097f829260e4a2ff08d32fec6017df1982a66e110ab4128486f8"
+  name = "github.com/dlclark/regexp2"
+  packages = [
+    ".",
+    "syntax",
+  ]
+  pruneopts = "UT"
+  revision = "487489b64fb796de2e55f4e8a4ad1e145f80e957"
+  version = "v1.1.6"
+
+[[projects]]
   digest = "1:114ecad51af93a73ae6781fd0d0bc28e52b433c852b84ab4b4c109c15e6c6b6d"
   name = "github.com/jroimartin/gocui"
   packages = ["."]
@@ -28,6 +87,12 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/jroimartin/gocui"]
+  input-imports = [
+    "github.com/alecthomas/chroma",
+    "github.com/alecthomas/chroma/formatters",
+    "github.com/alecthomas/chroma/lexers",
+    "github.com/alecthomas/chroma/styles",
+    "github.com/jroimartin/gocui",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -26,6 +26,10 @@
 
 
 [[constraint]]
+  name = "github.com/alecthomas/chroma"
+  version = "0.6.0"
+
+[[constraint]]
   name = "github.com/jroimartin/gocui"
   version = "0.4.0"
 
