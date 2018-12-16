@@ -43,9 +43,9 @@ func (ve *VimEditor) InsertMode(v *gocui.View, key gocui.Key, ch rune, mod gocui
 	case key == gocui.KeyEsc:
 		ve.mode = false
 		v.Title = "G-Vim Read"
+		highlightSyntax(v, v.ViewBuffer())
 	case ch != 0 && mod == 0:
 		v.EditWrite(ch)
-		//highlightSyntax(v)
 	case key == gocui.KeySpace:
 		v.EditWrite(' ')
 	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
@@ -170,6 +170,7 @@ func layout(g *gocui.Gui) error {
 		v.Editable = true
 		v.Wrap = true
 		v.Frame = true
+		//v.SelBgColor = gocui.ColorBlack
 		v.Editor = &VimEditor{}
 		isFileExist := isFileExists(fileName)
 		if isFileExist {
@@ -177,7 +178,7 @@ func layout(g *gocui.Gui) error {
 			check(err)
 			content := string(data)
 			v.Clear()
-			fmt.Fprintf(v, content)
+			highlightSyntax(v, content)
 		} else {
 			os.Create(fileName)
 		}
@@ -252,14 +253,16 @@ func commandForWrite(g *gocui.Gui, v *gocui.View) {
 	bytes, err := f.WriteString(content)
 	v.Clear()
 	fmt.Fprintf(v, "Wrote %d bytes into file %s", bytes, fileName)
+	v.Editor = nil
 	f.Sync()
 }
 
 func highlightSyntax(view *gocui.View, content string) {
-	if content != "" {
-		content = view.ViewBuffer()
+	fileArgs := strings.Split(fileName, ".")
+	if len(fileArgs) < 2 {
+		return
 	}
-	extn := strings.Split(fileName, ".")[1]
+	extn := fileArgs[len(fileArgs)-1]
 	lexer := lexers.Get(extn)
 	if lexer == nil {
 		lexer = lexers.Fallback
@@ -269,6 +272,9 @@ func highlightSyntax(view *gocui.View, content string) {
 	if style == nil {
 		style = styles.Fallback
 	}
+	builder := style.Builder()
+	builder.Add(chroma.Background, "#000000")
+	style, _ = builder.Build()
 	formatter := formatters.Get("terminal256")
 	iterator, _ := lexer.Tokenise(nil, content)
 	if formatter == nil {
